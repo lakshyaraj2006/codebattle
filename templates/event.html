@@ -1,0 +1,42 @@
+{% extends "main.html" %}
+{% load static %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static "css/event.css" %}">
+{% endblock css %}
+
+{% block content %}
+<div class="section">
+    <h1>{{event.name}}</h1>
+</div>
+
+<div class="section" id="event--action--wrapper">
+{% if request.user.is_authenticated %}
+    {% if request.user in event.participants.all %}
+        {% if not submitted %}
+            <a class="btn btn--primary" href="{% url "project_submission" event.id %}">Submit Project</a>
+        {% endif %}
+    {% else %}
+        <a class="btn btn--primary" href="{% url "registration_confirmation" event.id %}">Register for Event</a>
+    {% endif %}
+{% endif %}
+</div>
+
+<div class="section">
+    <p>{{event.description|linebreaksbr|urlize}}</p>
+</div>
+
+<div class="users--lists section">
+    {% for user in event.participants.all %}
+        <a href="{% url 'profile' user.id%}">
+        <div class="wrapper--user">
+            <img class="user--avatar--sm" src="{{user.avatar.url}}"/>
+            <h4>{{user.name}}</h4>
+            {% if user.bio %}
+                <p>{{user.bio|truncatechars:50}}</p>
+            {% endif %}
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% endblock content %}
