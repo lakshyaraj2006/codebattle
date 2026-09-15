@@ -36,7 +36,7 @@ def logout_user(request):
     messages.success(request, "Logged out successfully!")
     return redirect('login')
 
-@is_guest
+@is_guest("account")
 def register_page(request):
     if request.method == "POST":
         form = CustomUserCreationForm(request.POST)
