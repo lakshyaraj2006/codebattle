@@ -1,31 +1,42 @@
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import login, logout, update_session_auth_hash
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.contrib import messages
 
-from .forms import CustomUserCreationForm, SubmissionForm, UserCreationForm
+from .decorators import is_guest
+from .utils import get_favicon
+from .forms import CustomAuthenticationForm, CustomPasswordChangeForm, CustomUserCreationForm, SubmissionForm, UserForm
 from .models import User, Event, Submission
 # Create your views here.
 
+@is_guest("account")
 def login_page(request):
     if request.method == "POST":
-        email = request.POST.get("email")
-        password = request.POST.get("password")
+        form = CustomAuthenticationForm(request, data=request.POST)
 
-        user = authenticate(email=email, password=password)
-
-        if user is not None:
+        if form.is_valid():
+            user = form.get_user()
             login(request, user)
-            return redirect('home')
+            messages.success(request, "Logged in successfully!")
+            return redirect("home")
+    else:
+        form = CustomAuthenticationForm()
 
-    page = 'login'
-    context = {'page': page}
+    context = {
+        "page": "login",
+        "form": form,
+    }
     return render(request, "login_register.html", context)
 
+@login_required(login_url='/login/')
 def logout_user(request):
     logout(request)
+    messages.success(request, "Logged out successfully!")
     return redirect('login')
 
+@is_guest
 def register_page(request):
     if request.method == "POST":
         form = CustomUserCreationForm(request.POST)
@@ -33,6 +44,7 @@ def register_page(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
+            messages.success(request, "Account created successfully!")
             return redirect('home')
     else:
         form = CustomUserCreationForm()
@@ -41,10 +53,37 @@ def register_page(request):
     context = {'page': page, 'form': form}
     return render(request, "login_register.html", context)
 
-def index(request):
-    users = User.objects.filter(hackathon_participant=True).all()
-    events = Event.objects.filter().all()
-    context = {'users': users, 'events': events}
+def home_page(request):
+    users = User.objects.filter(hackathon_participant=True)
+
+    try:
+        limit = int(request.GET.get("limit", 20))
+    except (TypeError, ValueError):
+        limit = 1
+
+    limit = max(1, min(limit, 50))
+
+    paginator = Paginator(users, limit)
+
+    page_number = request.GET.get("page", 20)
+
+    try:
+        users_page = paginator.page(page_number)
+    except PageNotAnInteger:
+        users_page = paginator.page(1)
+    except EmptyPage:
+        users_page = paginator.page(paginator.num_pages)
+
+    events = Event.objects.all()
+
+    context = {
+        "users": users_page,
+        "events": events,
+        "users_count": users.count(),
+        "paginator": paginator,
+        "limit": limit,
+    }
+
     return render(request, "home.html", context)
 
 def event_page(request, pk):
@@ -59,7 +98,26 @@ def event_page(request, pk):
 
 def user_page(request, pk):
     user = get_object_or_404(User, id=pk)
-    context = {'user': user}
+
+    socials = [
+        ("Twitter", user.twitter),
+        ("LinkedIn", user.linkedin),
+        ("Website", user.website),
+        ("Facebook", user.facebook),
+        ("GitHub", user.github),
+    ]
+
+    socials = [
+        {
+            "name": name,
+            "url": url,
+            "icon": get_favicon(url)
+        }
+        for name, url in socials
+        if url
+    ]
+
+    context = {'user': user, 'socials': socials}
     return render(request, "profile.html", context)
 
 @login_required(login_url='/login/')
@@ -68,11 +126,47 @@ def account_page(request):
     context = {'user': user}
     return render(request, "account.html", context)
 
+@login_required(login_url='/login/')
+def edit_account(request):
+    if request.method == "POST":
+        form = UserForm(request.POST, request.FILES, instance=request.user)
+        avatar = request.user.avatar
+        is_uploaded = request.FILES.get("avatar")
+
+        if form.is_valid():
+            user = form.save()
+            if is_uploaded and avatar.name.startswith(f"avatars/{request.user.username}_"):
+                avatar.delete(save=False)
+
+            messages.success(request, "Account updated successfully!")
+            return redirect("account")
+    else:
+        form = UserForm(instance=request.user)
+    context = {'form': form}
+    return render(request, "user_form.html", context)
+
+@login_required(login_url='/login/')
+def change_password(request):
+    if request.method == "POST":
+        form = CustomPasswordChangeForm(request.user, request.POST)
+
+        if form.is_valid():
+            form.save()
+
+            update_session_auth_hash(request, request.user)
+            messages.success(request, "Password changed successfully!")
+            return redirect("account")
+    else:
+        form = CustomPasswordChangeForm(request.user)
+    context = {'form': form}
+    return render(request, "change_password.html", context)
+
 def register_confirmation(request, pk):
     event = get_object_or_404(Event, id=pk)
 
     if request.method == "POST":
         event.participants.add(request.user)
+        messages.success(request, "Registered for event successfully!")
         return redirect('event', pk=pk)
 
     context = {'event': event}
@@ -97,6 +191,7 @@ def project_submission(request, pk):
             submission.participant = request.user
             submission.save()
 
+            messages.success(request, "Project submitted successfully!")
             return redirect("event", pk=pk)
         
         return redirect("event", pk=pk)
@@ -124,6 +219,7 @@ def update_submission(request, pk):
             submission.participant = request.user
             submission.save()
 
+            messages.success(request, "Submission updated successfully!")
             return redirect("account")
         
         return redirect("account")

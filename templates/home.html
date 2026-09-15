@@ -1,37 +1,182 @@
 {% extends "main.html" %}
 
 {% block content %}
-    <section class="container--events">
-        <h3>Events</h3>
+<div class="container py-5">
 
-        <div class="events--lists section">
+    <!-- Events -->
+    <section class="mb-5">
+        <div class="mb-4">
+            <h3 class="font-weight-semibold mb-1">Events</h3>
+            <p class="text-muted mb-0">Discover upcoming events and join in.</p>
+        </div>
+
+        {% if events %}
+        <div class="row">
             {% for event in events %}
-            <a href="{% url "event" event.id %}">
-                <div class="wrapper--event">
-                    <strong>{{event.name}}</strong>
-                    <p>{{event.participants.all|length}} participants</p>
-                    <p>Registration Deadline: {{event.registration_deadline}}</p>
-                </div>
-            </a>
+            <div class="col-12 col-lg-6 mb-4">
+                <a href="{% url "event" event.id %}" class="text-decoration-none text-dark">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body p-4">
+
+                            <div class="d-flex justify-content-between align-items-start">
+                                <h5 class="card-title font-weight-bold mb-3">
+                                    {{ event.name }}
+                                </h5>
+
+                                <i class="bi bi-arrow-up-right text-muted ml-3"></i>
+                            </div>
+
+                            <div class="border-top pt-3">
+                                <div class="row text-muted small">
+                                    <div class="col-12 col-sm-6 mb-2 mb-sm-0">
+                                        <i class="bi bi-people mr-1"></i>
+                                        {{ event.participants.all|length }} participant{{event.participants.all|length|pluralize}}
+                                    </div>
+
+                                    <div class="col-12 col-sm-6">
+                                        <i class="bi bi-calendar-event mr-1"></i>
+                                        {{ event.registration_deadline }}
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </a>
+            </div>
             {% endfor %}
         </div>
+
+        {% else %}
+        <div class="alert alert-secondary mb-0">
+            <i class="bi bi-calendar-x mr-2"></i>
+            No events yet. Please check back soon!
+        </div>
+        {% endif %}
     </section>
 
+
+    <!-- Community -->
     <section>
-        <h3>Users: {{users|length}}</h3>
-        
-        <div class="users--lists">
+        <div class="d-flex justify-content-between align-items-end mb-4">
+            <div>
+                <h3 class="font-weight-semibold mb-1">Community</h3>
+                <p class="text-muted mb-0">Meet people from the community.</p>
+            </div>
+
+            <span class="text-muted small">
+                {{ users_count }} users
+            </span>
+        </div>
+
+        {% if users %}
+        <div class="row">
             {% for user in users %}
-            <a href="{% url "profile" user.id %}">
-                <div class="wrapper--user">
-                    <img src="{{user.avatar.url}}" alt="{{user.username}}" class="user--avatar--sm">
-                    <h4>{{user.name}}</h4>
-                    {% if user.bio %}
-                        <p>{{user.bio|truncatechars:50}}</p>
-                    {% endif %}
-                </div>
-            </a>
+            <div class="col-12 col-md-6 col-xl-4 mb-3">
+                <a href="{% url "profile" user.id %}" class="text-decoration-none text-dark">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body d-flex align-items-center p-3">
+
+                            <img src="{{ user.avatar.url }}" alt="{{ user.username }}" class="rounded-circle mr-3" width="56" height="56" style="object-fit: cover;">
+
+                            <div class="flex-grow-1 overflow-hidden">
+                                <h6 class="font-weight-bold mb-1 text-truncate">
+                                    {{ user.name }}
+                                </h6>
+
+                                <p class="text-muted small mb-0 text-truncate">
+                                    @{{ user.username }}
+                                </p>
+                            </div>
+
+                            <i class="bi bi-chevron-right text-muted ml-3"></i>
+
+                        </div>
+                    </div>
+                </a>
+            </div>
             {% endfor %}
         </div>
+
+        {% if users.paginator.num_pages > 1 %}
+<div class="mt-4">
+    <nav aria-label="User pagination">
+        <ul class="pagination justify-content-center">
+
+            <!-- Previous -->
+            {% if users.has_previous %}
+                <li class="page-item">
+                    <a class="page-link"
+                       href="?page={{ users.previous_page_number }}&limit={{ limit }}"
+                       aria-label="Previous">
+                        &laquo;
+                    </a>
+                </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">&laquo;</span>
+                </li>
+            {% endif %}
+
+
+            <!-- Page numbers -->
+            {% for page in users.paginator.page_range %}
+                {% if page == users.number %}
+                    <li class="page-item active" aria-current="page">
+                        <span class="page-link">{{ page }}</span>
+                    </li>
+
+                {% elif page == 1 or page == users.paginator.num_pages %}
+                    <li class="page-item">
+                        <a class="page-link"
+                           href="?page={{ page }}&limit={{ limit }}">
+                            {{ page }}
+                        </a>
+                    </li>
+
+                {% elif page >= users.number|add:"-2" and page <= users.number|add:"2" %}
+                    <li class="page-item">
+                        <a class="page-link"
+                           href="?page={{ page }}&limit={{ limit }}">
+                            {{ page }}
+                        </a>
+                    </li>
+
+                {% elif page == users.number|add:"-3" or page == users.number|add:"3" %}
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+
+            <!-- Next -->
+            {% if users.has_next %}
+                <li class="page-item">
+                    <a class="page-link"
+                       href="?page={{ users.next_page_number }}&limit={{ limit }}"
+                       aria-label="Next">
+                        &raquo;
+                    </a>
+                </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">&raquo;</span>
+                </li>
+            {% endif %}
+
+        </ul>
+    </nav>
+</div>
+{% endif %}
+
+        {% else %}
+        <div class="alert alert-secondary mb-0">
+            <i class="bi bi-people mr-2"></i>
+            No users yet.
+        </div>
+        {% endif %}
     </section>
+
+</div>
 {% endblock content %}

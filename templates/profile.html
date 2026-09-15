@@ -1,5 +1,89 @@
 {% extends "main.html" %}
 
 {% block content %}
-    <h1>{{user.name}}</h1>
+<div class="container py-5">
+
+    <div class="row">
+
+        <!-- Profile -->
+    <div class="col-12 col-md-4 mb-4">
+        <div class="card shadow-sm text-center h-100">
+            <div class="card-body p-4">
+                <img src="{{ user.avatar.url }}" alt="{{ user.username }}" width="120" height="120" class="rounded-circle mb-3" style="object-fit: cover;">
+                <h2 class="font-weight-bold mb-1">{{ user.name }}</h2>
+                <p class="text-muted mb-3">@{{ user.username }}</p>
+
+                {% if socials %}
+                    <div class="d-flex justify-content-center flex-wrap">
+                        {% for social in socials %}
+                            <a href="{{ social.url }}" target="_blank" rel="noopener noreferrer" class="border rounded d-flex align-items-center justify-content-center mx-1 mb-2" style="width: 42px; height: 42px;" data-toggle="tooltip" data-placement="bottom" title="{{ social.name }}">
+                                <img src="{{ social.icon }}" alt="{{ social.name }}" width="20" height="20">
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+        <!-- Information -->
+        <div class="col-12 col-md-8">
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-body p-4">
+
+                    <h4 class="font-weight-bold mb-4">Information</h4>
+
+                    <div class="row">
+
+                        <div class="col-12 col-sm-6 mb-3">
+                            <small class="text-muted d-block">Name</small>
+                            <span class="font-weight-bold">{{ user.name }}</span>
+                        </div>
+
+                        <div class="col-12 col-sm-6 mb-3">
+                            <small class="text-muted d-block">Username</small>
+                            <span>@{{ user.username }}</span>
+                        </div>
+
+                        <div class="col-12">
+                            <small class="text-muted d-block">Bio</small>
+                            {% if user.bio %}
+                                <p class="mb-0">{{ user.bio }}</p>
+                            {% else %}
+                                <p class="text-muted mb-0">No bio available.</p>
+                            {% endif %}
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Participated Events -->
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h4 class="font-weight-bold mb-4">Participated Events</h4>
+
+                    {% if user.events.all %}
+                    <div class="list-group">
+                        {% for event in user.events.all %}
+                        <a href="{% url "event" event.id %}" class="list-group-item list-group-item-action">
+                            {{ event.name }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="col-12">
+                        <p class="text-muted mb-0">No participated events.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
 {% endblock content %}

@@ -1,40 +1,73 @@
 {% extends "main.html" %}
 
 {% block content %}
-    {% if page == "register" %}
-    <h1>Register</h1>
+<div class="row my-3">
+    <div class="col-md-4 my-2 mx-auto">
+        <div class="card">
+            {% if page == "register" %}
+            <div class="card-header">
+                <h4>Register</h4>
+            </div>
 
-    <form action="{% url "register" %}" method="post">
-        {% csrf_token %}
-        
-        {{form.as_p}}
+            <div class="card-body">
+                {% if form.non_field_errors %} 
+                    {% for error in form.non_field_errors %} 
+                    <div class="alert alert-danger" role="alert"> {{ error }} </div> 
+                    {% endfor %} 
+                {% endif %} 
+                <form action="{% url "register" %}" method="post">
+                    {% csrf_token %}
+                    
+                    {% for field in form %}
+                    <div class="form-group">
+                        <label for="{{field.id_for_label}}">{{field.label}}</label>
+                        {{field}}
+                        {% for error in field.errors %} 
+                            <p class="text-danger mb-0"> {{ error }} </p> 
+                        {% endfor %} 
+                    </div>
+                    {% endfor %}
 
-        <div>
-            <input type="submit" value="Register">
+                    <button type="submit" class="btn btn-danger w-100">Register</button>
+                </form>
+            </div>
+
+            <div class="card-footer">
+                <p class="mb-0 text-center">Already have an account ? <a href="{% url "login" %}">Login</a></p>
+            </div>
+            {% else %}
+            <div class="card-header">
+                <h4>Login User</h4>
+            </div>
+
+            <div class="card-body">
+                {% if form.non_field_errors %} 
+                    {% for error in form.non_field_errors %} 
+                    <div class="alert alert-danger" role="alert"> {{ error }} </div> 
+                    {% endfor %} 
+                {% endif %} 
+                <form action="{% url "login" %}" method="post">
+                    {% csrf_token %}
+                    
+                    {% for field in form %}
+                    <div class="form-group">
+                        <label for="{{field.id_for_label}}">{{field.label}}</label>
+                        {{field}}
+                        {% for error in field.errors %} 
+                            <p class="text-danger mb-0"> {{ error }} </p> 
+                        {% endfor %} 
+                    </div>
+                    {% endfor %}
+
+                    <button class="btn btn-danger w-100" type="submit">Login</button>
+                </form>
+            </div>
+
+            <div class="card-footer">
+                <p class="mb-0 text-center">Don't have an account ? <a href="{% url "register" %}">Register</a></p>
+            </div>
+            {% endif %}
         </div>
-
-        <p>Already have an account ? <a href="{% url "login" %}">Login</a></p>
-    </form>
-    {% else %}
-    <h1>Login User</h1>
-
-    <form action="{% url "login" %}" method="post">
-        {% csrf_token %}
-        <div>
-            <label for="email">Email</label>
-            <input type="email" name="email" id="email">
-        </div>
-
-        <div>
-            <label for="password">Password</label>
-            <input type="password" name="password" id="password">
-        </div>
-
-        <div>
-            <input type="submit" value="Login">
-        </div>
-
-        <p>Don't have an account ? <a href="{% url "register" %}">Register</a></p>
-    </form>
-    {% endif %}
+    </div>
+</div>
 {% endblock content %}
