@@ -36,6 +36,11 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]', 'codebattle-eight.vercel.app
 # Application definition
 
 INSTALLED_APPS = [
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+    'allauth.socialaccount.providers.github',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -55,6 +60,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 ROOT_URLCONF = 'codebattle.urls'
@@ -159,3 +165,62 @@ STORAGES = {
         "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
     },
 }
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+LOGIN_REDIRECT_URL = "/account/"
+LOGOUT_REDIRECT_URL = "/login/"
+
+# Allauth Account settings
+ACCOUNT_USER_MODEL_USERNAME_FIELD = "username"
+ACCOUNT_USER_MODEL_EMAIL_FIELD = "email"
+ACCOUNT_LOGIN_METHODS = {"email"}
+ACCOUNT_SIGNUP_FIELDS = ["email*", "username*", "password1*", "password2*"]
+ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_EMAIL_VERIFICATION = "none"
+
+# Allauth Social Account settings
+SOCIALACCOUNT_AUTO_SIGNUP = True
+SOCIALACCOUNT_EMAIL_VERIFICATION = "none"
+SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
+SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
+SOCIALACCOUNT_LOGIN_ON_GET = True
+SOCIALACCOUNT_ADAPTER = "base.adapters.CustomSocialAccountAdapter"
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {
+        "SCOPE": [
+            "profile",
+            "email",
+        ],
+        "AUTH_PARAMS": {
+            "access_type": "online",
+        },
+    },
+    "github": {
+        "SCOPE": [
+            "user",
+            "user:email",
+        ],
+    },
+}
+
+GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
+GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET")
+if GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET:
+    SOCIALACCOUNT_PROVIDERS["google"]["APP"] = {
+        "client_id": GOOGLE_CLIENT_ID,
+        "secret": GOOGLE_CLIENT_SECRET,
+        "key": "",
+    }
+
+GITHUB_CLIENT_ID = os.environ.get("GITHUB_CLIENT_ID")
+GITHUB_CLIENT_SECRET = os.environ.get("GITHUB_CLIENT_SECRET")
+if GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET:
+    SOCIALACCOUNT_PROVIDERS["github"]["APP"] = {
+        "client_id": GITHUB_CLIENT_ID,
+        "secret": GITHUB_CLIENT_SECRET,
+        "key": "",
+    }

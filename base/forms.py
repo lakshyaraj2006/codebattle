@@ -8,7 +8,7 @@ from .models import Submission
 class UserForm(ModelForm):
     class Meta:
         model = User
-        fields = ['username', 'email', 'avatar', 'bio', 'twitter', 'linkedin', 'website', 'facebook', 'github']
+        fields = ['username', 'name', 'avatar', 'bio', 'twitter', 'linkedin', 'website', 'facebook', 'github']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

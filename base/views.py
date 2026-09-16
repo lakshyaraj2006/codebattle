@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout, update_session_auth_hash
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.contrib import messages
+from django.db.models import Q
 
 from .decorators import is_guest
 from .utils import get_favicon
@@ -85,6 +86,41 @@ def home_page(request):
     }
 
     return render(request, "home.html", context)
+
+def search_page(request):
+    query = request.GET.get("q", "").strip()
+    category = request.GET.get("category", "all").strip()
+
+    events = Event.objects.none()
+    users = User.objects.none()
+
+    if query:
+        events = Event.objects.filter(
+            Q(name__icontains=query) |
+            Q(description__icontains=query)
+        ).distinct()
+
+        users = User.objects.filter(
+            Q(username__icontains=query) |
+            Q(name__icontains=query) |
+            Q(bio__icontains=query) |
+            Q(email__icontains=query)
+        ).distinct()
+
+    events_count = events.count() if query else 0
+    users_count = users.count() if query else 0
+    total_count = events_count + users_count
+
+    context = {
+        "query": query,
+        "category": category,
+        "events": events,
+        "users": users,
+        "events_count": events_count,
+        "users_count": users_count,
+        "total_count": total_count,
+    }
+    return render(request, "search.html", context)
 
 def event_page(request, pk):
     event = get_object_or_404(Event, id=pk)
