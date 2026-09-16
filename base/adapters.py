@@ -1,19 +1,5 @@
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from allauth.account.utils import user_username, user_email, user_field
-from django.db.models.fields.files import ImageFieldFile
-
-# Ensure ImageFieldFile.url dynamically returns external URLs directly without modifying models.py
-if not hasattr(ImageFieldFile, "_original_url"):
-    ImageFieldFile._original_url = ImageFieldFile.url
-
-    @property
-    def _custom_url(self):
-        if self.name and (self.name.startswith("http://") or self.name.startswith("https://")):
-            return self.name
-        return ImageFieldFile._original_url.fget(self)
-
-    ImageFieldFile.url = _custom_url
-
 
 class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
     """
