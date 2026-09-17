@@ -1,46 +1,62 @@
 {% extends "main.html" %}
+{% load static %}
+
+{% block title %}Submit Project - {{ event.name }} | CodeBattle{% endblock title %}
 
 {% block content %}
+<div class="max-w-2xl mx-auto py-6 sm:py-8 space-y-6">
 
-<div class="container py-5">
-
-    <div class="mb-4">
-        <h4 class="font-weight-bold mb-1">Submit Project</h4>
-        <p class="text-muted mb-0">Submit your project for {{ event.name }}</p>
-    </div>
-
-    <div class="mb-4">
-        {% if form.non_field_errors %} 
-            {% for error in form.non_field_errors %} 
-            <div class="alert alert-danger" role="alert"> {{ error }} </div> 
-            {% endfor %} 
-        {% endif %} 
-        {% for field in form %} 
-            {% for error in field.errors %} 
-                <div class="alert alert-danger" role="alert"> {{ error }} </div> 
-            {% endfor %} 
-        {% endfor %}
-    </div>
-
-    <form action="" method="post">
-        {% csrf_token %}
-
-        {% for field in form %}
-            <div class="form-group">
-                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                {{ field }}
+    <!-- Header Card -->
+    <div class="bg-white rounded-3xl border border-gray-200/90 p-6 sm:p-8 shadow-sm">
+        <div class="flex items-center gap-3 mb-2">
+            <div class="w-10 h-10 rounded-xl bg-red-50 text-red-600 flex items-center justify-center">
+                <span class="icon icon-submit w-5 h-5 text-red-600"></span>
             </div>
-        {% endfor %}
+            <div>
+                <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight">Project Submission</h1>
+                <p class="text-xs text-gray-500">Event: <strong class="text-red-600 font-semibold">{{ event.name }}</strong></p>
+            </div>
+        </div>
+        <p class="text-xs text-gray-600 leading-relaxed mt-3 pt-3 border-t border-gray-100">
+            Provide details about your project submission, such as repository URL, demo link, tech stack, and a summary of what you built.
+        </p>
+    </div>
 
+    <!-- Form Card -->
+    <div class="bg-white rounded-3xl border border-gray-200/90 p-6 sm:p-8 shadow-sm space-y-6">
         {% if form.non_field_errors %}
             {% for error in form.non_field_errors %}
-                <div class="alert alert-danger">{{ error }}</div>
+            <div class="p-4 text-sm font-medium text-red-800 rounded-2xl bg-red-50 border border-red-200" role="alert">
+                {{ error }}
+            </div>
             {% endfor %}
         {% endif %}
 
-        <button type="submit" class="btn btn-primary">Submit Project</button>
-    </form>
+        <form action="" method="post" class="space-y-5">
+            {% csrf_token %}
+
+            {% for field in form %}
+            <div class="space-y-1.5">
+                <label for="{{ field.id_for_label }}" class="block text-xs font-bold text-gray-700 uppercase tracking-wider">
+                    {{ field.label }}
+                </label>
+                {{ field }}
+                {% for error in field.errors %}
+                    <p class="text-xs text-red-600 font-medium mt-1">{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endfor %}
+
+            <div class="pt-3 flex flex-col sm:flex-row items-center gap-3">
+                <a href="{% url 'event' event.id %}" class="w-full sm:w-auto inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition">
+                    Cancel
+                </a>
+                <button type="submit" class="w-full sm:flex-1 inline-flex items-center justify-center px-6 py-2.5 text-sm font-bold text-white bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 rounded-xl transition shadow-md shadow-red-600/20">
+                    Save Submission
+                </button>
+            </div>
+        </form>
+    </div>
 
 </div>
-
 {% endblock content %}

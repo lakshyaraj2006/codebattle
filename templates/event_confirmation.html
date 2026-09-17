@@ -1,21 +1,39 @@
 {% extends "main.html" %}
+{% load static %}
+
+{% block title %}Register for {{ event.name }} | CodeBattle{% endblock title %}
 
 {% block content %}
+<div class="max-w-xl mx-auto py-8 sm:py-12">
+    <div class="bg-white rounded-3xl border border-gray-200/90 p-8 sm:p-10 shadow-lg text-center space-y-6">
+        
+        <!-- Confirmation Icon -->
+        <div class="w-16 h-16 rounded-2xl bg-red-50 text-red-600 border border-red-100 flex items-center justify-center mx-auto shadow-sm">
+            <span class="icon icon-check-circle w-8 h-8 text-red-600"></span>
+        </div>
 
-<div class="container py-5">
-    <div class="text-center">
+        <div class="space-y-2">
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">
+                Registration Confirmation
+            </span>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
+                Join <span class="text-red-600">{{ event.name }}</span>
+            </h2>
+            <p class="text-sm text-gray-500 max-w-md mx-auto">
+                Are you ready to participate? Once registered, you will be enrolled as an active competitor and able to submit your project before the deadline.
+            </p>
+        </div>
 
-        <h2 class="font-weight-bold mb-3">Register for <u>{{ event.name }}</u></h2>
-        <p class="text-muted mb-4">Are you sure you want to register for this event?</p>
-
-        <form action="" method="post">
+        <form action="" method="post" class="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
             {% csrf_token %}
-
-            <a href="{% url "event" event.id %}" class="btn btn-outline-secondary mr-2">Go Back</a>
-            <button type="submit" class="btn btn-primary">Confirm Registration</button>
+            <a href="{% url 'event' event.id %}" class="w-full sm:w-auto inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition">
+                Cancel
+            </a>
+            <button type="submit" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 rounded-xl transition shadow-md shadow-red-600/20">
+                Confirm Registration
+            </button>
         </form>
 
     </div>
 </div>
-
 {% endblock content %}

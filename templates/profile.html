@@ -1,89 +1,127 @@
 {% extends "main.html" %}
+{% load static %}
+
+{% block title %}{{ user.name|default:user.username }} (@{{ user.username }}) | CodeBattle{% endblock title %}
 
 {% block content %}
-<div class="container py-5">
+<div class="max-w-6xl mx-auto">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-    <div class="row">
+        <!-- Left Profile Card -->
+        <div class="lg:col-span-4">
+            <div class="bg-white rounded-3xl border border-gray-200/90 p-6 sm:p-8 shadow-sm text-center space-y-4 sticky top-20">
+                <div class="relative inline-block mx-auto">
+                    <img src="{{ user.avatar.url }}" alt="{{ user.username }}" class="w-32 h-32 rounded-full object-cover ring-4 ring-red-500/20 shadow-md mx-auto">
+                    <span class="absolute bottom-1 right-1 w-5 h-5 bg-emerald-500 border-2 border-white rounded-full"></span>
+                </div>
 
-        <!-- Profile -->
-    <div class="col-12 col-md-4 mb-4">
-        <div class="card shadow-sm text-center h-100">
-            <div class="card-body p-4">
-                <img src="{{ user.avatar.url }}" alt="{{ user.username }}" width="120" height="120" class="rounded-circle mb-3" style="object-fit: cover;">
-                <h2 class="font-weight-bold mb-1">{{ user.name }}</h2>
-                <p class="text-muted mb-3">@{{ user.username }}</p>
+                <div>
+                    <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight">
+                        {{ user.name|default:user.username }}
+                    </h1>
+                    <p class="text-sm font-medium text-gray-500 mt-0.5">
+                        @{{ user.username }}
+                    </p>
+                </div>
 
+                {% if user.bio %}
+                <p class="text-sm text-gray-600 leading-relaxed pt-2 border-t border-gray-100">
+                    {{ user.bio }}
+                </p>
+                {% endif %}
+
+                <!-- Social Links -->
                 {% if socials %}
-                    <div class="d-flex justify-content-center flex-wrap">
+                <div class="pt-4 border-t border-gray-100">
+                    <p class="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">Connect</p>
+                    <div class="flex items-center justify-center flex-wrap gap-2">
                         {% for social in socials %}
-                            <a href="{{ social.url }}" target="_blank" rel="noopener noreferrer" class="border rounded d-flex align-items-center justify-content-center mx-1 mb-2" style="width: 42px; height: 42px;" data-toggle="tooltip" data-placement="bottom" title="{{ social.name }}">
-                                <img src="{{ social.icon }}" alt="{{ social.name }}" width="20" height="20">
-                            </a>
+                        <a href="{{ social.url }}" target="_blank" rel="noopener noreferrer"
+                            data-tooltip-target="tooltip-social-{{ forloop.counter }}"
+                            class="w-10 h-10 rounded-xl border border-gray-200 bg-gray-50 hover:bg-white hover:border-red-400 hover:shadow-md flex items-center justify-center transition-all p-2 group">
+                            <img src="{{ social.icon }}" alt="{{ social.name }}" class="w-5 h-5 object-contain group-hover:scale-110 transition-transform">
+                        </a>
+                        <!-- Flowbite Tooltip -->
+                        <div id="tooltip-social-{{ forloop.counter }}" role="tooltip" class="absolute z-50 invisible inline-block px-3 py-1.5 text-xs font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip">
+                            {{ social.name }}
+                            <div class="tooltip-arrow" data-popper-arrow></div>
+                        </div>
                         {% endfor %}
                     </div>
+                </div>
                 {% endif %}
             </div>
         </div>
-    </div>
 
-        <!-- Information -->
-        <div class="col-12 col-md-8">
+        <!-- Right Content Column -->
+        <div class="lg:col-span-8 space-y-6">
 
-            <div class="card shadow-sm mb-4">
-                <div class="card-body p-4">
+            <!-- Information Card -->
+            <div class="bg-white rounded-3xl border border-gray-200/90 p-6 sm:p-8 shadow-sm space-y-5">
+                <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2 pb-3 border-b border-gray-100">
+                    <span class="icon icon-user w-5 h-5 text-red-600"></span>
+                    Personal Information
+                </h2>
 
-                    <h4 class="font-weight-bold mb-4">Information</h4>
-
-                    <div class="row">
-
-                        <div class="col-12 col-sm-6 mb-3">
-                            <small class="text-muted d-block">Name</small>
-                            <span class="font-weight-bold">{{ user.name }}</span>
-                        </div>
-
-                        <div class="col-12 col-sm-6 mb-3">
-                            <small class="text-muted d-block">Username</small>
-                            <span>@{{ user.username }}</span>
-                        </div>
-
-                        <div class="col-12">
-                            <small class="text-muted d-block">Bio</small>
-                            {% if user.bio %}
-                                <p class="mb-0">{{ user.bio }}</p>
-                            {% else %}
-                                <p class="text-muted mb-0">No bio available.</p>
-                            {% endif %}
-                        </div>
-
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="p-4 rounded-2xl bg-gray-50/80 border border-gray-100">
+                        <span class="block text-xs font-semibold text-gray-400 uppercase tracking-wider">Full Name</span>
+                        <span class="block text-sm font-bold text-gray-900 mt-1">{{ user.name|default:"Not specified" }}</span>
                     </div>
 
+                    <div class="p-4 rounded-2xl bg-gray-50/80 border border-gray-100">
+                        <span class="block text-xs font-semibold text-gray-400 uppercase tracking-wider">Username</span>
+                        <span class="block text-sm font-bold text-gray-900 mt-1">@{{ user.username }}</span>
+                    </div>
+
+                    <div class="sm:col-span-2 p-4 rounded-2xl bg-gray-50/80 border border-gray-100">
+                        <span class="block text-xs font-semibold text-gray-400 uppercase tracking-wider">Bio</span>
+                        <p class="text-sm text-gray-700 mt-1 leading-relaxed">
+                            {% if user.bio %}{{ user.bio }}{% else %}<span class="text-gray-400 italic">No biography provided yet.</span>{% endif %}
+                        </p>
+                    </div>
                 </div>
             </div>
 
             <!-- Participated Events -->
-            <div class="card shadow-sm">
-                <div class="card-body p-4">
-                    <h4 class="font-weight-bold mb-4">Participated Events</h4>
-
-                    {% if user.events.all %}
-                    <div class="list-group">
-                        {% for event in user.events.all %}
-                        <a href="{% url "event" event.id %}" class="list-group-item list-group-item-action">
-                            {{ event.name }}
-                        </a>
-                        {% endfor %}
-                    </div>
-                    {% else %}
-                    <div class="col-12">
-                        <p class="text-muted mb-0">No participated events.</p>
-                    </div>
-                    {% endif %}
+            <div class="bg-white rounded-3xl border border-gray-200/90 p-6 sm:p-8 shadow-sm space-y-4">
+                <div class="flex items-center justify-between pb-3 border-b border-gray-100">
+                    <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                        <span class="icon icon-lightning w-5 h-5 text-red-600"></span>
+                        Participated Events
+                    </h2>
+                    <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-gray-100 text-gray-700">
+                        {{ user.events.all|length }}
+                    </span>
                 </div>
+
+                {% if user.events.all %}
+                <div class="space-y-2.5">
+                    {% for event in user.events.all %}
+                    <a href="{% url 'event' event.id %}" class="group block">
+                        <div class="flex items-center justify-between p-4 rounded-2xl border border-gray-200 hover:border-red-300 hover:bg-red-50/30 transition-all">
+                            <div class="space-y-0.5">
+                                <h3 class="text-sm font-bold text-gray-900 group-hover:text-red-600 transition-colors">
+                                    {{ event.name }}
+                                </h3>
+                                <p class="text-xs text-gray-500 flex items-center gap-1">
+                                    <span>Deadline: {{ event.registration_deadline|date:"M d, Y" }}</span>
+                                </p>
+                            </div>
+                            <span class="icon icon-chevron-right w-4 h-4 text-gray-400 group-hover:text-red-500 transition-colors"></span>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-8">
+                    <p class="text-sm text-gray-400 italic">No participated events yet.</p>
+                </div>
+                {% endif %}
             </div>
 
         </div>
 
     </div>
-
 </div>
 {% endblock content %}

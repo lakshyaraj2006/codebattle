@@ -1,5 +1,6 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout, update_session_auth_hash
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
@@ -121,6 +122,45 @@ def search_page(request):
         "total_count": total_count,
     }
     return render(request, "search.html", context)
+
+def search_autocomplete(request):
+    query = request.GET.get("q", "").strip()
+    results = {
+        "events": [],
+        "users": []
+    }
+    
+    if query:
+        events = Event.objects.filter(
+            Q(name__icontains=query) |
+            Q(description__icontains=query)
+        ).distinct()[:5]
+
+        users = User.objects.filter(
+            Q(username__icontains=query) |
+            Q(name__icontains=query) |
+            Q(email__icontains=query)
+        ).distinct()[:5]
+
+        for e in events:
+            results["events"].append({
+                "id": str(e.id),
+                "name": e.name,
+                "url": reverse("event", kwargs={"pk": e.id}),
+                "status": e.event_status,
+                "participants_count": e.participants.count(),
+            })
+
+        for u in users:
+            results["users"].append({
+                "id": str(u.id),
+                "name": u.name or u.username,
+                "username": u.username,
+                "avatar": u.avatar.url if u.avatar else "/static/icons/user.png",
+                "url": reverse("profile", kwargs={"pk": u.id}),
+            })
+
+    return JsonResponse(results)
 
 def event_page(request, pk):
     event = get_object_or_404(Event, id=pk)

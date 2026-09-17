@@ -1,87 +1,121 @@
 {% extends "main.html" %}
+{% load static %}
+
+{% block title %}{{ event.name }} | CodeBattle{% endblock title %}
 
 {% block content %}
+<div class="max-w-5xl mx-auto space-y-8">
 
-<div class="container py-5">
-
-    <div class="mb-4">
-        <h1 class="font-weight-bold mb-0">{{ event.name }}</h1>
-    </div>
-
-    {% if request.user.is_authenticated %}
-        {% if event.event_status == 'Finished' %}
-            <div class="alert alert-danger" role="alert">
-                <p class="mb-0">This event has ended.</p>
+    <!-- Event Header & Banner -->
+    <div class="bg-white rounded-3xl border border-gray-200/90 p-6 sm:p-8 shadow-sm space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+            <div class="space-y-2">
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold {% if event.event_status == 'Ongoing' %}bg-emerald-50 text-emerald-700 border border-emerald-200{% elif event.event_status == 'Upcoming' %}bg-blue-50 text-blue-700 border border-blue-200{% else %}bg-gray-100 text-gray-700 border border-gray-200{% endif %}">
+                        <span class="w-1.5 h-1.5 rounded-full {% if event.event_status == 'Ongoing' %}bg-emerald-500 animate-pulse{% elif event.event_status == 'Upcoming' %}bg-blue-500{% else %}bg-gray-400{% endif %} me-1.5"></span>
+                        {{ event.event_status }}
+                    </span>
+                    <span class="text-xs text-gray-500 flex items-center gap-1">
+                        <span class="icon icon-calendar w-3.5 h-3.5 text-gray-400"></span>
+                        Registration Deadline: <strong class="text-gray-700 font-semibold">{{ event.registration_deadline|date:"F d, Y" }}</strong>
+                    </span>
+                </div>
+                <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900 tracking-tight">
+                    {{ event.name }}
+                </h1>
             </div>
-        {% else %}
-            <div class="mb-4">
-                {% if request.user in event.participants.all %}
 
-                    {% if event.event_status == 'Ongoing' and not submitted %}
-                        <a class="btn btn-sm btn-primary"
-                        href="{% url 'project_submission' event.id %}">
-                            Submit Project
-                        </a>
-                    {% endif %}
-
-                {% else %}
-
-                    {% if event.registration_open %}
-                        <a class="btn btn-sm btn-primary"
-                        href="{% url 'registration_confirmation' event.id %}">
-                            Register
-                        </a>
+            <!-- Action Buttons -->
+            <div class="flex-shrink-0">
+                {% if request.user.is_authenticated %}
+                    {% if event.event_status == 'Finished' %}
+                        <div class="inline-flex items-center px-4 py-2 rounded-xl text-sm font-semibold bg-gray-100 text-gray-600 border border-gray-200">
+                            <span class="icon icon-clock w-4 h-4 mr-1.5 text-gray-500"></span>
+                            Event Concluded
+                        </div>
                     {% else %}
-                        <button class="btn btn-sm btn-primary" disabled>
-                            Registration Closed
-                        </button>
+                        {% if request.user in event.participants.all %}
+                            {% if event.event_status == 'Ongoing' and not submitted %}
+                                <a href="{% url 'project_submission' event.id %}" class="inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-xl transition shadow-md shadow-red-600/20">
+                                    <span class="icon icon-submit w-4 h-4 mr-2 text-white"></span>
+                                    Submit Project
+                                </a>
+                            {% elif submitted %}
+                                <span class="inline-flex items-center px-4 py-2 rounded-xl text-sm font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                    <span class="icon icon-check-circle w-4 h-4 mr-1.5 text-emerald-600"></span>
+                                    Project Submitted
+                                </span>
+                            {% else %}
+                                <span class="inline-flex items-center px-4 py-2 rounded-xl text-sm font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                                    <span class="icon icon-check-circle w-4 h-4 mr-1.5 text-blue-600"></span>
+                                    Registered
+                                </span>
+                            {% endif %}
+                        {% else %}
+                            {% if event.registration_open %}
+                                <a href="{% url 'registration_confirmation' event.id %}" class="inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 rounded-xl transition shadow-md shadow-red-600/20">
+                                    Register Now
+                                </a>
+                            {% else %}
+                                <button disabled class="inline-flex items-center px-4 py-2 rounded-xl text-sm font-semibold bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed">
+                                    Registration Closed
+                                </button>
+                            {% endif %}
+                        {% endif %}
                     {% endif %}
-
+                {% else %}
+                    <a href="{% url 'login' %}" class="inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-xl transition shadow-sm">
+                        Log in to Register
+                    </a>
                 {% endif %}
             </div>
-        {% endif %}
-    {% endif %}
+        </div>
 
-    <div class="mb-5">
-        <p class="text-muted mb-0">{{ event.description|linebreaksbr|urlize }}</p>
+        <!-- Description Box -->
+        <div class="border-t border-gray-100 pt-6">
+            <h3 class="text-sm font-bold uppercase tracking-wider text-gray-400 mb-3">About this Event</h3>
+            <div class="prose prose-sm max-w-none text-gray-700 leading-relaxed space-y-2">
+                {{ event.description|linebreaksbr|urlize }}
+            </div>
+        </div>
     </div>
 
-    <div>
-        <h4 class="font-weight-bold mb-3">Participants</h4>
 
-        <div class="row">
+    <!-- Participants Section -->
+    <div class="space-y-4">
+        <div class="flex items-center justify-between border-b border-gray-200 pb-3">
+            <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+                <span class="icon icon-participants w-5 h-5 text-red-600"></span>
+                Participants
+            </h3>
+            <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-red-50 text-red-700 border border-red-200">
+                {{ event.participants.all|length }} Registered
+            </span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {% for user in event.participants.all %}
-                <div class="col-12 col-md-6 col-lg-4 mb-3">
-                    <a href="{% url "profile" user.id %}" class="text-decoration-none text-dark">
-                        <div class="card shadow-sm h-100">
-                            <div class="card-body d-flex align-items-center p-3">
-
-                                <img src="{{ user.avatar.url }}" alt="{{ user.username }}" class="rounded-circle mr-3" width="56" height="56" style="object-fit: cover;">
-
-                                <div class="flex-grow-1 overflow-hidden">
-                                    <h6 class="font-weight-bold mb-1 text-truncate">
-                                        {{ user.name }}
-                                    </h6>
-
-                                    <p class="text-muted small mb-0 text-truncate">
-                                        @{{ user.username }}
-                                    </p>
-                                </div>
-
-                                <i class="bi bi-chevron-right text-muted ml-3"></i>
-
-                            </div>
-                        </div>
-                    </a>
+            <a href="{% url 'profile' user.id %}" class="group block">
+                <div class="h-full bg-white rounded-xl border border-gray-200 p-4 shadow-sm hover:shadow-md hover:border-red-300 hover:-translate-y-0.5 transition-all duration-150 flex items-center space-x-3.5">
+                    <img src="{{ user.avatar.url }}" alt="{{ user.username }}" class="w-12 h-12 rounded-full object-cover ring-2 ring-gray-100 group-hover:ring-red-400 transition-all flex-shrink-0">
+                    <div class="flex-grow min-w-0">
+                        <h4 class="text-sm font-bold text-gray-900 truncate group-hover:text-red-600 transition-colors">
+                            {{ user.name|default:user.username }}
+                        </h4>
+                        <p class="text-xs text-gray-500 truncate">
+                            @{{ user.username }}
+                        </p>
+                    </div>
+                    <span class="icon icon-chevron-right w-4 h-4 text-gray-400 group-hover:text-red-500 transition-colors flex-shrink-0"></span>
                 </div>
+            </a>
             {% empty %}
-                <div class="col-12">
-                    <p class="text-muted mb-0">No participants yet.</p>
-                </div>
+            <div class="col-span-full bg-white rounded-xl border border-dashed border-gray-300 p-8 text-center">
+                <p class="text-sm text-gray-500">No participants registered yet. Be the first!</p>
+            </div>
             {% endfor %}
         </div>
     </div>
 
 </div>
-
 {% endblock content %}

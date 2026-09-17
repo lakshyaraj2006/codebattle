@@ -1,179 +1,243 @@
 {% extends "main.html" %}
+{% load static %}
+
+{% block title %}Home | CodeBattle{% endblock title %}
 
 {% block content %}
-<div class="container py-5">
+<div class="space-y-12">
 
-    <!-- Events -->
-    <section class="mb-5">
-        <div class="mb-4">
-            <h3 class="font-weight-semibold mb-1">Events</h3>
-            <p class="text-muted mb-0">Discover upcoming events and join in.</p>
+    <!-- Hero / Welcome Banner -->
+    <div
+        class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-gray-900 via-slate-900 to-gray-950 p-8 sm:p-12 text-white shadow-xl border border-gray-800">
+        <!-- Ambient background glows -->
+        <div class="absolute -top-24 -left-24 w-80 h-80 bg-red-600/15 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-24 -right-24 w-80 h-80 bg-rose-600/10 rounded-full blur-3xl pointer-events-none">
+        </div>
+
+        <div class="relative z-10 w-full space-y-4">
+            <div
+                class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-red-500/10 text-red-400 border border-red-500/20 backdrop-blur-md">
+                <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                <span>Live Hackathons & Arena</span>
+            </div>
+
+            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white leading-tight">
+                Build. Compete. <span
+                    class="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-rose-400">Level Up.</span>
+            </h1>
+
+            <p class="text-gray-300 text-sm sm:text-base leading-relaxed">
+                Join exciting coding challenges, register for upcoming hackathons, showcase your submissions, and
+                connect with brilliant developers worldwide.
+            </p>
+
+            <div class="pt-2 flex flex-wrap items-center gap-4">
+                <a href="#events-section"
+                    class="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-xl transition shadow-md shadow-red-600/20">
+                    <span>Explore Events</span>
+                    <span class="icon icon-arrow-down w-4 h-4 text-white"></span>
+                </a>
+                <a href="{% url 'search' %}"
+                    class="inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold text-gray-200 bg-gray-800/80 hover:bg-gray-800 border border-gray-700 rounded-xl transition">
+                    Search Community
+                </a>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Events Section -->
+    <section id="events-section" class="space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2 border-b border-gray-200/80 pb-4">
+            <div>
+                <h2 class="text-2xl font-bold tracking-tight text-gray-900 flex items-center gap-2">
+                    <span class="icon icon-lightning w-6 h-6 text-red-600"></span>
+                    Featured Events
+                </h2>
+                <p class="text-sm text-gray-500 mt-1">Discover active competitions and register your team.</p>
+            </div>
+            <span
+                class="text-xs font-semibold px-3 py-1 rounded-full bg-gray-100 text-gray-600 border border-gray-200 self-start sm:self-auto">
+                {{ events|length }} Event{{ events|length|pluralize }}
+            </span>
         </div>
 
         {% if events %}
-        <div class="row">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {% for event in events %}
-            <div class="col-12 col-lg-6 mb-4">
-                <a href="{% url "event" event.id %}" class="text-decoration-none text-dark">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-body p-4">
+            <a href="{% url 'event' event.id %}" class="group block">
+                <div
+                    class="h-full bg-white rounded-2xl border border-gray-200/90 p-6 shadow-sm hover:shadow-md hover:border-red-300 hover:-translate-y-0.5 transition-all duration-200 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-start justify-between gap-3 mb-3">
+                            <h3 class="text-xl font-bold text-gray-900 group-hover:text-red-600 transition-colors">
+                                {{ event.name }}
+                            </h3>
+                            <span
+                                class="flex-shrink-0 inline-flex items-center p-2 rounded-lg bg-gray-50 text-gray-400 group-hover:bg-red-50 group-hover:text-red-600 transition-colors">
+                                <span
+                                    class="icon icon-arrow-up-right w-4 h-4 transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform text-gray-400 group-hover:text-red-600"></span>
+                            </span>
+                        </div>
 
-                            <div class="d-flex justify-content-between align-items-start">
-                                <h5 class="card-title font-weight-bold mb-3">
-                                    {{ event.name }}
-                                </h5>
+                        {% if event.description %}
+                        <p class="text-sm text-gray-600 line-clamp-2 mb-4 leading-relaxed">
+                            {{ event.description|truncatewords:28 }}
+                        </p>
+                        {% endif %}
+                    </div>
 
-                                <i class="bi bi-arrow-up-right text-muted ml-3"></i>
-                            </div>
+                    <div
+                        class="pt-4 border-t border-gray-100 flex flex-wrap items-center justify-between gap-3 text-xs text-gray-500">
+                        <div
+                            class="flex items-center gap-1.5 font-medium text-gray-700 bg-gray-50 px-2.5 py-1 rounded-lg">
+                            <span class="icon icon-participants w-4 h-4 text-gray-500"></span>
+                            <span>{{ event.participants.all|length }} participant{{
+                                event.participants.all|length|pluralize }}</span>
+                        </div>
 
-                            <div class="border-top pt-3">
-                                <div class="row text-muted small">
-                                    <div class="col-12 col-sm-6 mb-2 mb-sm-0">
-                                        <i class="bi bi-people mr-1"></i>
-                                        {{ event.participants.all|length }} participant{{event.participants.all|length|pluralize}}
-                                    </div>
-
-                                    <div class="col-12 col-sm-6">
-                                        <i class="bi bi-calendar-event mr-1"></i>
-                                        {{ event.registration_deadline }}
-                                    </div>
-                                </div>
-                            </div>
-
+                        <div class="flex items-center gap-1.5 text-gray-500">
+                            <span class="icon icon-calendar w-4 h-4 text-gray-400"></span>
+                            <span>Deadline: <strong class="text-gray-700 font-semibold">{{
+                                    event.registration_deadline|date:"M d, Y" }}</strong></span>
                         </div>
                     </div>
-                </a>
-            </div>
+                </div>
+            </a>
             {% endfor %}
         </div>
-
         {% else %}
-        <div class="alert alert-secondary mb-0">
-            <i class="bi bi-calendar-x mr-2"></i>
-            No events yet. Please check back soon!
+        <div class="text-center py-12 px-4 rounded-2xl bg-white border border-dashed border-gray-300">
+            <span class="icon icon-calendar mx-auto h-12 w-12 text-gray-300 block mb-2"></span>
+            <h3 class="mt-2 text-sm font-semibold text-gray-900">No events found</h3>
+            <p class="mt-1 text-sm text-gray-500">No hackathons or events are scheduled yet. Please check back soon!</p>
         </div>
         {% endif %}
     </section>
 
 
-    <!-- Community -->
-    <section>
-        <div class="d-flex justify-content-between align-items-end mb-4">
+    <!-- Community Section -->
+    <section class="space-y-6 pt-6">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2 border-b border-gray-200/80 pb-4">
             <div>
-                <h3 class="font-weight-semibold mb-1">Community</h3>
-                <p class="text-muted mb-0">Meet people from the community.</p>
+                <h2 class="text-2xl font-bold tracking-tight text-gray-900 flex items-center gap-2">
+                    <span class="icon icon-users w-6 h-6 text-red-600"></span>
+                    Community Hackers
+                </h2>
+                <p class="text-sm text-gray-500 mt-1">Meet developers and fellow participants from the CodeBattle arena.
+                </p>
             </div>
-
-            <span class="text-muted small">
-                {{ users_count }} users
+            <span
+                class="text-xs font-semibold px-3 py-1 rounded-full bg-red-50 text-red-700 border border-red-200 self-start sm:self-auto">
+                {{ users_count }} Member{{ users_count|pluralize }}
             </span>
         </div>
 
         {% if users %}
-        <div class="row">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {% for user in users %}
-            <div class="col-12 col-md-6 col-xl-4 mb-3">
-                <a href="{% url "profile" user.id %}" class="text-decoration-none text-dark">
-                    <div class="card shadow-sm h-100">
-                        <div class="card-body d-flex align-items-center p-3">
-
-                            <img src="{{ user.avatar.url }}" alt="{{ user.username }}" class="rounded-circle mr-3" width="56" height="56" style="object-fit: cover;">
-
-                            <div class="flex-grow-1 overflow-hidden">
-                                <h6 class="font-weight-bold mb-1 text-truncate">
-                                    {{ user.name }}
-                                </h6>
-
-                                <p class="text-muted small mb-0 text-truncate">
-                                    @{{ user.username }}
-                                </p>
-                            </div>
-
-                            <i class="bi bi-chevron-right text-muted ml-3"></i>
-
-                        </div>
+            <a href="{% url 'profile' user.id %}" class="group block">
+                <div
+                    class="h-full bg-white rounded-xl border border-gray-200/90 p-4 shadow-sm hover:shadow-md hover:border-red-300 hover:-translate-y-0.5 transition-all duration-150 flex items-center space-x-3.5">
+                    <img src="{{ user.avatar.url }}" alt="{{ user.username }}"
+                        class="w-12 h-12 rounded-full object-cover ring-2 ring-gray-100 group-hover:ring-red-400 transition-all flex-shrink-0">
+                    <div class="flex-grow min-w-0">
+                        <h4 class="text-sm font-bold text-gray-900 truncate group-hover:text-red-600 transition-colors">
+                            {{ user.name|default:user.username }}
+                        </h4>
+                        <p class="text-xs text-gray-500 truncate">
+                            @{{ user.username }}
+                        </p>
                     </div>
-                </a>
-            </div>
+                    <span
+                        class="icon icon-chevron-right w-4 h-4 text-gray-400 group-hover:text-red-500 transition-colors flex-shrink-0"></span>
+                </div>
+            </a>
             {% endfor %}
         </div>
 
+        <!-- Pagination -->
         {% if users.paginator.num_pages > 1 %}
-<div class="mt-4">
-    <nav aria-label="User pagination">
-        <ul class="pagination justify-content-center">
-
-            <!-- Previous -->
-            {% if users.has_previous %}
-                <li class="page-item">
-                    <a class="page-link"
-                       href="?page={{ users.previous_page_number }}&limit={{ limit }}"
-                       aria-label="Previous">
-                        &laquo;
-                    </a>
-                </li>
-            {% else %}
-                <li class="page-item disabled">
-                    <span class="page-link">&laquo;</span>
-                </li>
-            {% endif %}
-
-
-            <!-- Page numbers -->
-            {% for page in users.paginator.page_range %}
-                {% if page == users.number %}
-                    <li class="page-item active" aria-current="page">
-                        <span class="page-link">{{ page }}</span>
+        <div class="flex justify-center pt-6">
+            <nav aria-label="User navigation">
+                <ul class="inline-flex -space-x-px text-sm rounded-lg shadow-sm">
+                    <!-- Previous -->
+                    {% if users.has_previous %}
+                    <li>
+                        <a href="?page={{ users.previous_page_number }}&limit={{ limit }}"
+                            class="flex items-center justify-center px-3.5 h-10 ms-0 leading-tight text-gray-600 bg-white border border-e-0 border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-900 transition-colors">
+                            <span class="sr-only">Previous</span>
+                            <span class="icon icon-chevron-left w-3 h-3 text-gray-600"></span>
+                        </a>
                     </li>
+                    {% else %}
+                    <li>
+                        <span
+                            class="flex items-center justify-center px-3.5 h-10 ms-0 leading-tight text-gray-300 bg-gray-50 border border-e-0 border-gray-200 rounded-s-lg cursor-not-allowed">
+                            <span class="icon icon-chevron-left w-3 h-3 text-gray-300"></span>
+                        </span>
+                    </li>
+                    {% endif %}
 
-                {% elif page == 1 or page == users.paginator.num_pages %}
-                    <li class="page-item">
-                        <a class="page-link"
-                           href="?page={{ page }}&limit={{ limit }}">
+                    <!-- Page Numbers -->
+                    {% for page in users.paginator.page_range %}
+                    {% if page == users.number %}
+                    <li>
+                        <span aria-current="page"
+                            class="flex items-center justify-center px-4 h-10 text-white border border-red-600 bg-red-600 font-semibold z-10">
+                            {{ page }}
+                        </span>
+                    </li>
+                    {% elif page == 1 or page == users.paginator.num_pages %}
+                    <li>
+                        <a href="?page={{ page }}&limit={{ limit }}"
+                            class="flex items-center justify-center px-4 h-10 leading-tight text-gray-700 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-900 transition-colors">
                             {{ page }}
                         </a>
                     </li>
-
-                {% elif page >= users.number|add:"-2" and page <= users.number|add:"2" %}
-                    <li class="page-item">
-                        <a class="page-link"
-                           href="?page={{ page }}&limit={{ limit }}">
+                    {% elif page >= users.number|add:"-2" and page <= users.number|add:"2" %} <li>
+                        <a href="?page={{ page }}&limit={{ limit }}"
+                            class="flex items-center justify-center px-4 h-10 leading-tight text-gray-700 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-900 transition-colors">
                             {{ page }}
                         </a>
-                    </li>
+                        </li>
+                        {% elif page == users.number|add:"-3" or page == users.number|add:"3" %}
+                        <li>
+                            <span
+                                class="flex items-center justify-center px-3 h-10 leading-tight text-gray-400 bg-white border border-gray-300">
+                                ...
+                            </span>
+                        </li>
+                        {% endif %}
+                        {% endfor %}
 
-                {% elif page == users.number|add:"-3" or page == users.number|add:"3" %}
-                    <li class="page-item disabled">
-                        <span class="page-link">...</span>
-                    </li>
-                {% endif %}
-            {% endfor %}
-
-
-            <!-- Next -->
-            {% if users.has_next %}
-                <li class="page-item">
-                    <a class="page-link"
-                       href="?page={{ users.next_page_number }}&limit={{ limit }}"
-                       aria-label="Next">
-                        &raquo;
-                    </a>
-                </li>
-            {% else %}
-                <li class="page-item disabled">
-                    <span class="page-link">&raquo;</span>
-                </li>
-            {% endif %}
-
-        </ul>
-    </nav>
-</div>
-{% endif %}
+                        <!-- Next -->
+                        {% if users.has_next %}
+                        <li>
+                            <a href="?page={{ users.next_page_number }}&limit={{ limit }}"
+                                class="flex items-center justify-center px-3.5 h-10 leading-tight text-gray-600 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-900 transition-colors">
+                                <span class="sr-only">Next</span>
+                                <span class="icon icon-chevron-right w-3 h-3 text-gray-600"></span>
+                            </a>
+                        </li>
+                        {% else %}
+                        <li>
+                            <span
+                                class="flex items-center justify-center px-3.5 h-10 ms-0 leading-tight text-gray-300 bg-gray-50 border border-gray-200 rounded-e-lg cursor-not-allowed">
+                                <span class="icon icon-chevron-right w-3 h-3 text-gray-300"></span>
+                            </span>
+                        </li>
+                        {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
 
         {% else %}
-        <div class="alert alert-secondary mb-0">
-            <i class="bi bi-people mr-2"></i>
-            No users yet.
+        <div class="text-center py-12 px-4 rounded-2xl bg-white border border-dashed border-gray-300">
+            <span class="icon icon-users mx-auto h-12 w-12 text-gray-300 block mb-2"></span>
+            <h3 class="mt-2 text-sm font-semibold text-gray-900">No community members yet</h3>
+            <p class="mt-1 text-sm text-gray-500">Be the first to join and complete your profile!</p>
         </div>
         {% endif %}
     </section>
