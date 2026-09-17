@@ -55,7 +55,7 @@ def register_page(request):
     return render(request, "login_register.html", context)
 
 def home_page(request):
-    users = User.objects.filter(hackathon_participant=True)
+    users = User.objects.filter(hackathon_participant=True).order_by('date_joined')
 
     try:
         limit = int(request.GET.get("limit", 20))
@@ -66,7 +66,7 @@ def home_page(request):
 
     paginator = Paginator(users, limit)
 
-    page_number = request.GET.get("page", 20)
+    page_number = request.GET.get("page", 1)
 
     try:
         users_page = paginator.page(page_number)
